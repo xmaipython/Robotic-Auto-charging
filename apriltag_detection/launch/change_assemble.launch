@@ -1,8 +1,9 @@
 <launch>
+    <!-- 导航到基站 -->
     <node name="nav_pose" pkg="apriltag_detection"    type="nav_pose.py" output="screen"/>
-
+    <!-- 启动相机识别标签 -->
     <include file="$(find apriltag_detection)/launch/tag.launch" />
-
+    <!-- 启动对接程序 -->
     <node name="tag_camera"              pkg="apriltag_detection" type="tag_camera.py" output="screen"/>
     <!-- <node name="tt_sub"         pkg="test_sym_imu" type="tt_sub.py" output="screen"/>
     <node name="go_charge"      pkg="test_sym_imu" type="go_charge.py" output="screen"/> -->
