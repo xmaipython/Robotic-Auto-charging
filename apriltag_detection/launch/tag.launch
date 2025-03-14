@@ -1,0 +1,14 @@
+<launch>
+    <!-- 启动第一个launch文件 -->
+    <include file="$(find apriltag_detection)/launch/camera.launch"/>
+
+    <!-- 启动第二个launch文件 -->
+    <include file="$(find apriltag_detection)/launch/continuous_detection.launch"/>
+
+    <!-- 启动Python文件 -->
+    <!-- <node name="python_script_node" pkg="your_package_name" type="script.py" output="screen"/> -->
+
+    <!-- 启动RViz并加载配置文件 -->
+    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find apriltag_detection)/apriltag.rviz" output="screen"/>-->
+
+</launch>

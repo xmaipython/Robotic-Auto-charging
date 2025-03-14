@@ -1,0 +1,9 @@
+<launch>
+    <node name="nav_pose" pkg="apriltag_detection"    type="nav_pose.py" output="screen"/>
+
+    <include file="$(find apriltag_detection)/launch/tag.launch" />
+
+    <node name="tag_camera"              pkg="apriltag_detection" type="tag_camera.py" output="screen"/>
+    <!-- <node name="tt_sub"         pkg="test_sym_imu" type="tt_sub.py" output="screen"/>
+    <node name="go_charge"      pkg="test_sym_imu" type="go_charge.py" output="screen"/> -->
+</launch>
