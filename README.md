@@ -1,14 +1,18 @@
 功能大部分来源于@冰达机器人，仅供免费使用，如有侵权请联系
 
 使用前准备-功能包
-```sudo apt install ros-$ROS_DISTRO-apriltag-ros```
-
-```cd ~/catkin_ws/src```
-```git clone https://github.com/xmaipython/Robotic-Auto-charging.git```
+```sh
+$ sudo apt install ros-$ROS_DISTRO-apriltag-ros
+$ 
+$ cd ~/catkin_ws/src
+$ git clone https://github.com/xmaipython/Robotic-Auto-charging.git
+```
 将文件夹apriltag_detection移动到上一个目录，然后编译工作空间
-```cd ~/catkin_ws```
-```catkin_make```
-```source ./devel/setup.bash```
+```sh
+$ cd ~/catkin_ws```
+$ catkin_make```
+$ source ./devel/setup.bash
+```
 
 doc目录
 存放了tag36h11标签族的标签图像，方便直接取用
@@ -29,7 +33,9 @@ standalone_tags:
 
 尝试启动相机和apriltag检测程序
 
-```roslaunch apriltag_detection change_assemble.launch```
+```sh
+$ roslaunch apriltag_detection change_assemble.launch
+```
 
 /***************change_assemble.launch****************/
 nav_pose.py      # 导航节点
