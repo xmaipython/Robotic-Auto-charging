@@ -1,6 +1,6 @@
 # ROBOTIC-AUTO-CHARGING
 
-功能大部分来源于@冰达机器人，仅供免费使用，如有侵权请联系
+标签检测功能来源于@冰达机器人，仅供免费使用，如有侵权请联系
 
 ### 使用前准备-功能包
 ```sh
@@ -10,8 +10,8 @@ $ git clone https://github.com/xmaipython/Robotic-Auto-charging.git
 ```
 将文件夹apriltag_detection移动到上一个目录，然后编译工作空间
 ```sh
-$ cd ~/catkin_ws```
-$ catkin_make```
+$ cd ~/catkin_ws
+$ catkin_make
 $ source ./devel/setup.bash
 ```
 
@@ -21,12 +21,13 @@ $ source ./devel/setup.bash
 存放相机标定文件ost.yaml和apriltag_ros相关的配置文件
 其中settings.yaml文件配置了apriltag检测的标签类型、使用计算机资源等，完整的参数参考wiki链接
 tags.yaml文件存放所检测的标签序号、尺寸信息，这里我们设置0、1三个标签的信息
+```sh
 standalone_tags:
   [
     {id: 0, size: 0.05},
     {id: 1, size: 0.05},
   ]
-
+```
 ### 使用前准备-标签
 将doc目录中的tag.docx文件按照一比一打印在A4纸上，如有条件，可以将打印后的A4纸贴在亚克力板或者硬纸板上，避免二维码因为纸张弯曲大幅度变形
 
