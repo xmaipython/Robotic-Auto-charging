@@ -1,9 +1,10 @@
+# ROBOTIC-AUTO-CHARGING
+
 功能大部分来源于@冰达机器人，仅供免费使用，如有侵权请联系
 
-使用前准备-功能包
+### 使用前准备-功能包
 ```sh
 $ sudo apt install ros-$ROS_DISTRO-apriltag-ros
-$ 
 $ cd ~/catkin_ws/src
 $ git clone https://github.com/xmaipython/Robotic-Auto-charging.git
 ```
@@ -14,9 +15,9 @@ $ catkin_make```
 $ source ./devel/setup.bash
 ```
 
-doc目录
+### doc目录
 存放了tag36h11标签族的标签图像，方便直接取用
-config目录
+### config目录
 存放相机标定文件ost.yaml和apriltag_ros相关的配置文件
 其中settings.yaml文件配置了apriltag检测的标签类型、使用计算机资源等，完整的参数参考wiki链接
 tags.yaml文件存放所检测的标签序号、尺寸信息，这里我们设置0、1三个标签的信息
@@ -26,7 +27,7 @@ standalone_tags:
     {id: 1, size: 0.05},
   ]
 
-使用前准备-标签
+### 使用前准备-标签
 将doc目录中的tag.docx文件按照一比一打印在A4纸上，如有条件，可以将打印后的A4纸贴在亚克力板或者硬纸板上，避免二维码因为纸张弯曲大幅度变形
 
 运行自动充电程序
