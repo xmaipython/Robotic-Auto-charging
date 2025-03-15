@@ -1,135 +1,74 @@
-# slam_in_autonomous_driving_notes
+功能大部分来源于@冰达机器人，仅供免费使用，如有侵权请联系
 
-高博的新书SLAM in Autonomous Driving book (SAD book)和深蓝学院课程《自动驾驶中的slam技术》第一期的课程笔记
+使用前准备-功能包
+sudo apt install ros-$ROS_DISTRO-apriltag-ros
 
-注：本项目为开源项目，不作商业用途，仅个人学习记录，为保护高翔老师的版权和其他权利，使用者需要在[https://github.com/gaoxiang12/slam_in_autonomous_driving/tree/master](https://github.com/gaoxiang12/slam_in_autonomous_driving/tree/master)
-的license的基础上进行开发和使用。
+cd ~/catkin_ws/src
+git clone https://github.com/xmaipython/Robotic-Auto-charging.git
+将文件夹apriltag_detection移动到上一个目录，然后编译工作空间
+cd ~/catkin_ws
+catkin_make
+source ./devel/setup.bash
 
-# 一、课程简介
+doc目录
+存放了tag36h11标签族的标签图像，方便直接取用
+config目录
+存放相机标定文件ost.yaml和apriltag_ros相关的配置文件
+其中settings.yaml文件配置了apriltag检测的标签类型、使用计算机资源等，完整的参数参考wiki链接
+tags.yaml文件存放所检测的标签序号、尺寸信息，这里我们设置0、1三个标签的信息
+standalone_tags:
+  [
+    {id: 0, size: 0.05},
+    {id: 1, size: 0.05},
+  ]
 
-此课程以激光slam为主，[高翔老师](https://github.com/gaoxiang12)的新书，[深蓝学院搭配课程《自动驾驶中的slam技术》第一期](https://www.shenlanxueyuan.com/my/course/615)
+使用前准备-标签
+将doc目录中的tag.docx文件按照一比一打印在A4纸上，如有条件，可以将打印后的A4纸贴在亚克力板或者硬纸板上，避免二维码因为纸张弯曲大幅度变形
 
-课程代码：[https://github.com/gaoxiang12/slam_in_autonomous_driving/tree/master](https://github.com/gaoxiang12/slam_in_autonomous_driving/tree/master)
+运行自动充电程序
 
-这个库是在学习课程过程中的笔记。计划包括思维导图笔记，相关证明与程序运行记录（不提供课程作业答案）
+尝试启动相机和apriltag检测程序
 
-|章节|笔记|代码|备注|
-|:----|:----|:----|:----|
-|源码安装|---|---|[点击跳转到本页面笔记](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#%E4%BA%8C%E4%BB%A3%E7%A0%81%E5%AE%89%E8%A3%85)|
-|第 0 章 笔记介绍|[笔记说明PDF](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%200%20%E7%AB%A0%20%E7%AC%94%E8%AE%B0%E4%BB%8B%E7%BB%8D.pdf)|---|[点击跳转到本页面笔记](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#%E7%AC%AC-0-%E7%AB%A0-%E7%AC%94%E8%AE%B0%E4%BB%8B%E7%BB%8D)|
-|第 1 章 自动驾驶|[第一章的笔记PDF](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%201%20%E7%AB%A0%20%E8%87%AA%E5%8A%A8%E9%A9%BE%E9%A9%B6.pdf)|---|[点击跳转到本页面笔记](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#%E7%AC%AC-1-%E7%AB%A0-%E8%87%AA%E5%8A%A8%E9%A9%BE%E9%A9%B6)|
-|第 2 章 基础数学知识回顾|[第二章的笔记PDF](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%202%20%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E6%95%B0%E5%AD%A6%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE.pdf)|---|[点击跳转到本页面笔记-图片过大，显示有问题，请查看PDF](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#%E7%AC%AC-2-%E7%AB%A0-%E5%9F%BA%E7%A1%80%E6%95%B0%E5%AD%A6%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE)|
+roslaunch apriltag_detection change_assemble.launch
 
+/***************change_assemble.launch****************/
+nav_pose.py      # 导航节点
+tag.launch        # 包含相机节点camera.launch、标签检测节点continuous_detection.launch
+tag_camera.py  # 对接充电桩节点
 
+/**********************nav_pose.py**********************/
+主要功能：
+	订阅 /StartGoBaseNode 话题，等待接收布尔类型的启动信号。
+	当接收到 True 信号时，启动机器人导航至预设目标点。
+	导航结束后，判断导航是否成功，并将结果通过 /navigation_success 话题发布出去。
+设置参数：
+	需要根据基站位置，从/amcl_pose获取坐标信息，来设置goal导航目标点。
 
-**优秀学员证书：**
+/********************tag_camera.py********************/
+主要功能：
+	用于控制机器人在导航到指定位置后，通过检测 AprilTag 标签实现与充电桩的对接。具体流程如下：
+	等待导航完成：程序启动后，处于等待状态，监听/navigation_success话题，当接收到导航成功的信号后，开始检测 AprilTag 标签。
+	检测 AprilTag 标签：订阅/tag_detections话题，根据检测到的标签（标签 0 和标签 1）情况，控制机器人左右移动，使机器人大致对准充电桩。
+	角度和左右调整：若同时检测到标签 0 和标签 1，开始进行角度和左右位置的精确调整，确保机器人与充电桩完全对准。
+	后退对接：当角度和左右位置都对准并持续一定时间后，机器人开始后退，直到达到预设的后退距离。
+	任务完成：后退完成后，发布对接完成的消息/docking_complete，并关闭程序。
+设置参数：
+	DISTANCE_TO_BACK：机器人后退对接的距离，默认值为0.05(m)。
+	ALIGNMENT_DURATION：角度和左右对准状态需要持续的时间，单位为秒，默认值为1（s）。
+	ANGLE_ERROR_THRESHOLD：角度调整的误差阈值，当标签高度差小于此值时，认为角度已对准，默认值为0.002（单位坐标）。（注：检测的tf空间与实际空间的单位并不符合，且关系非线性，故无法确定准确单位）
+	TARGET_DISTANCE_Y：标签 0 的目标y坐标，当标签 0 的y坐标在此范围内时，认为左右已对准，默认值为-0.058（单位坐标）。
+	TARGET_DISTANCE_Y_ERROR：左右对准的误差范围，默认值为0.005（单位坐标）。
 
-![优秀学员证书](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/imgs/graduation.png)
+/********************camera.launch********************/
+主要功能：
+	启动相机，发布/usb_cam 系列图像话题
+设置参数：
+	相机设备号：默认值为/dev/video0
 
-# 二、代码安装
+/*************continuous_detection.launch*************/
+主要功能：
+	启动标签检测，并发布/tag_detections标签信息话题、/tag_detections 系列图像话题
+设置参数：
+	标签参数设置：路径/apriltag_detection/tags.yaml中的standalone_tags设置所检测标签序号以及标签大小，用于标定，现使用5cm边长的标签。
 
-**系统：ubuntu20**
-
-参考页面：[https://github.com/gaoxiang12/slam_in_autonomous_driving/tree/master](https://github.com/gaoxiang12/slam_in_autonomous_driving/tree/master)
-
-## 2.1安装步骤：
-
-**（1）安装ubuntu20系统（新的系统从0开始快速安装）**
-
-**（2）c++环境及其他基础工具**
-
-```plain
-sudo apt update
-sudo apt upgrade
-sudo apt install build-essential
-sudo apt install git
-sudo apt install wget
-gcc -v  # gcc version 9.4.0
-```
-**（3）ros-****Noetic****环境**（课程和代码不使用ros相关知识，只是编译和运行代码需要）
-下面是我学习ros的时候遇到的工具，来自鱼哥。
-
-```plain
-wget http://fishros.com/install -O fishros && . fishros
-```
-依次选择：【1】一键安装:ROS --> 【1】更换系统源再继续安装(国内)/【2】不更换继续安装(国外) --> 【1】[1]:noetic(ROS1) 
-即可安装ros-Noetic
-
-**（4）ros的其他依赖**
-
-```plain
-sudo apt install -y ros-noetic-pcl-ros ros-noetic-velodyne-msgs libopencv-dev libgoogle-glog-dev libeigen3-dev libsuitesparse-dev libpcl-dev libyaml-cpp-dev libbtbb-dev libgmock-dev
-```
-**（5）Pangolin安装（自行选择安装路径）**
-```plain
-git clone --recursive https://github.com/stevenlovegrove/Pangolin.git
-cd Pangolin
-./scripts/install_prerequisites.sh recommended
-cmake -B build
-cmake --build build
-sudo make install
-sudo ldconfig # 来自助教的解决，不做这个操作后面会报错
-```
-**（6）slam_in_autonomous_driving及g2o编译运行**
-**g2o：（路径自行安装）**
-
-```plain
-git clone https://github.com/gaoxiang12/slam_in_autonomous_driving.git
-cd slam_in_autonomous_driving/
-cd thirdparty/g2o/
-mkdir build
-cd build/
-cmake ..
-make -j4
-```
-手动操作：（在thirdparty/g2o/的文件夹中搜索config.h文件，将config.h文件放在thirdparty/g2o/路径下）
-**slam_in_autonomous_driving编译：**
-
-```plain
-cd slam_in_autonomous_driving/
-mkdir build
-cd build/
-cmake ..
-make -j4
-```
-至此不报错的话编译结束。
-**slam_in_autonomous_driving运行：**
-
-编译生成的所有可执行文件在slam_in_autonomous_driving/bin/文件夹中
-
-运行时需要在slam_in_autonomous_driving/目录下，在此处新建一个名为dataset的文件夹，将提供的数据集放在这个文件夹中，最终数据集的目录结构slam_in_autonomous_driving/dataset/sad/2dmapping
-
-# 三、更新记录
-
-TODO:在这里写更新的记录
-
-|时间|章节|笔记|代码|备注|
-|:----|:----|:----|:----|:----|
-|2023.05.13|00_源码安装|readme.md|---|源码安装的步骤|
-|2023.08.29|笔记说明文件上传|[笔记说明PDF](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%200%20%E7%AB%A0%20%E7%AC%94%E8%AE%B0%E4%BB%8B%E7%BB%8D.pdf)|---|[点击跳转到本页面笔记](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#%E7%AC%AC-0-%E7%AB%A0-%E7%AC%94%E8%AE%B0%E4%BB%8B%E7%BB%8D)|
-|2023.08.29|第一章的笔记上传|[第一章的笔记PDF](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%201%20%E7%AB%A0%20%E8%87%AA%E5%8A%A8%E9%A9%BE%E9%A9%B6.pdf)|---|[点击跳转到本页面笔记](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#%E7%AC%AC-1-%E7%AB%A0-%E8%87%AA%E5%8A%A8%E9%A9%BE%E9%A9%B6)|
-|2023.08.29|第二章的笔记上传|[第二章的笔记PDF](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%202%20%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E6%95%B0%E5%AD%A6%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE.pdf)|---|[点击跳转到本页面笔记](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#%E7%AC%AC-2-%E7%AB%A0-%E5%9F%BA%E7%A1%80%E6%95%B0%E5%AD%A6%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE)|
-|    |    |    |    |    |
-|    |    |    |    |    |
-|    |    |    |    |    |
-
-# 四、xmind思维导图笔记
-
-
-## 第 0 章 笔记介绍 
-
-[回到最上方](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#slam_in_autonomous_driving_notes)
-
-![第 0 章 笔记介绍](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%200%20%E7%AB%A0%20%E7%AC%94%E8%AE%B0%E4%BB%8B%E7%BB%8D_00.png)
-
-## 第 1 章 自动驾驶 
-
-[回到最上方](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#slam_in_autonomous_driving_notes)
-
-![第 1 章 自动驾驶](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%201%20%E7%AB%A0%20%E8%87%AA%E5%8A%A8%E9%A9%BE%E9%A9%B6_00.png)
-
-## 第 2 章 基础数学知识回顾 
-
-[回到最上方](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/tree/main#slam_in_autonomous_driving_notes)
-
-![第 2 章 基础数学知识回顾](https://github.com/Longxiaoze/slam_in_autonomous_driving_notes/blob/main/notes/%E7%AC%AC%202%20%E7%AB%A0%20%E5%9F%BA%E7%A1%80%E6%95%B0%E5%AD%A6%E7%9F%A5%E8%AF%86%E5%9B%9E%E9%A1%BE_00.png)
+通过订阅tag_detections话题或者监听相机坐标相对于标签坐标之间的位置关系，就可以获得标签和相机之间的位置关系，有了这个比较准确的位置关系，可以完成目标跟踪、视觉抓取等应用。
