@@ -20,19 +20,19 @@ rqt_image_view
 
 ##### usb_cam 下载标签检测功能包
 ```sh
-$ sudo apt install ros-$ROS_DISTRO-apriltag-ros
+sudo apt install ros-$ROS_DISTRO-apriltag-ros
 ```
 
 ##### usb_cam 下载此功能包
 ```sh
-$ cd ~/catkin_ws/src
-$ git clone https://github.com/xmaipython/Robotic-Auto-charging.git
+cd ~/catkin_ws/src
+git clone https://github.com/xmaipython/Robotic-Auto-charging.git
 ```
 将文件夹apriltag_detection移动到上一个目录，然后编译工作空间
 ```sh
-$ cd ~/catkin_ws
-$ catkin_make
-$ source ./devel/setup.bash
+cd ~/catkin_ws
+catkin_make
+source ./devel/setup.bash
 ```
 
 ### doc目录
@@ -56,7 +56,7 @@ standalone_tags:
 
 ### 运行自动充电程序
 ```sh
-$ roslaunch apriltag_detection change_assemble.launch
+roslaunch apriltag_detection change_assemble.launch
 ```
 
 /**change_assemble.launch**/  # 需要启动导航节点后启动
@@ -71,7 +71,7 @@ $ roslaunch apriltag_detection change_assemble.launch
 * 订阅 /StartGoBaseNode 话题，等待接收布尔类型的启动信号。
 可在终端输入以下命令发布启动信号
 ```sh
-$ rostopic pub /StartGoBaseNode std_msgs/Bool "data: true"
+rostopic pub /StartGoBaseNode std_msgs/Bool "data: true"
 ```
 * 当接收到 True 信号时，启动机器人导航至预设目标点。
 * 导航结束后，判断导航是否成功，并将结果通过 /navigation_success 话题发布出去。
