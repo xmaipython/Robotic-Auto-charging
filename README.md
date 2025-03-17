@@ -3,8 +3,28 @@
 标签检测功能来源于@冰达机器人，仅供免费使用，如有侵权请联系
 
 ### 使用前准备-功能包
+##### usb_cam 下载摄像头驱动包
+```sh
+sudo apt install ros-noetic-usb-cam
+```
+安装没有报错即为完成
+
+##### usb_cam测试运行
+```sh
+roslaunch usb_cam usb_cam-test.launch
+```
+摄像头启动后启用rqt工具查看图像
+```sh
+rqt_image_view
+```
+
+##### usb_cam 下载标签检测功能包
 ```sh
 $ sudo apt install ros-$ROS_DISTRO-apriltag-ros
+```
+
+##### usb_cam 下载此功能包
+```sh
 $ cd ~/catkin_ws/src
 $ git clone https://github.com/xmaipython/Robotic-Auto-charging.git
 ```
@@ -17,6 +37,7 @@ $ source ./devel/setup.bash
 
 ### doc目录
 存放了tag36h11标签族的标签图像，方便直接取用
+
 ### config目录
 存放相机标定文件ost.yaml和apriltag_ros相关的配置文件
 其中settings.yaml文件配置了apriltag检测的标签类型、使用计算机资源等，完整的参数参考wiki链接
@@ -28,6 +49,7 @@ standalone_tags:
     {id: 1, size: 0.05},
   ]
 ```
+
 ### 使用前准备-标签
 将doc目录中的tag.docx文件按照一比一打印在A4纸上，如有条件，可以将打印后的A4纸贴在亚克力板或者硬纸板上，避免二维码因为纸张弯曲大幅度变形
 
@@ -39,7 +61,7 @@ standalone_tags:
 $ roslaunch apriltag_detection change_assemble.launch
 ```
 
-/***************change_assemble.launch****************/
+/**change_assemble.launch**/  # 需要启动导航节点后启动
 * parameter_nav_pose.py       # 导航节点，可设置导航坐标点参数
 * camera.launch               # 包含相机节点camera.launch、标签检测节点
 * continuous_detection.launch # 标签检测节点
