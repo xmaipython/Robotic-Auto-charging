@@ -53,10 +53,8 @@ standalone_tags:
 ### 使用前准备-标签
 将doc目录中的tag.docx文件按照一比一打印在A4纸上，如有条件，可以将打印后的A4纸贴在亚克力板或者硬纸板上，避免二维码因为纸张弯曲大幅度变形
 
-运行自动充电程序
 
-尝试启动相机和apriltag检测程序
-
+### 运行自动充电程序
 ```sh
 $ roslaunch apriltag_detection change_assemble.launch
 ```
