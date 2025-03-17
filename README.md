@@ -5,7 +5,7 @@
 ### 使用前准备-功能包
 ##### usb_cam 下载摄像头驱动包
 ```sh
-sudo apt install ros-noetic-usb-cam
+sudo apt install ros-$ROS_DISTRO-usb-cam
 ```
 安装没有报错即为完成
 
