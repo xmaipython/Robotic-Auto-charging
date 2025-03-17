@@ -9,6 +9,6 @@
     <!-- <node name="python_script_node" pkg="your_package_name" type="script.py" output="screen"/> -->
 
     <!-- 启动RViz并加载配置文件 -->
-    <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find apriltag_detection)/apriltag.rviz" output="screen"/>-->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find apriltag_detection)/apriltag.rviz" output="screen"/>
 
 </launch>

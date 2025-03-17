@@ -158,6 +158,7 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/nav_pose.py
   scripts/tag_camera.py
+  scripts/parameter_nav_pose.py
 
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

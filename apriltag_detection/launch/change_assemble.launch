@@ -1,10 +1,20 @@
 <launch>
-    <!-- 导航到基站 -->
-    <node name="nav_pose" pkg="apriltag_detection"    type="nav_pose.py" output="screen"/>
-    <!-- 启动相机识别标签 -->
-    <include file="$(find apriltag_detection)/launch/tag.launch" />
-    <!-- 启动对接程序 -->
-    <node name="tag_camera"              pkg="apriltag_detection" type="tag_camera.py" output="screen"/>
-    <!-- <node name="tt_sub"         pkg="test_sym_imu" type="tt_sub.py" output="screen"/>
-    <node name="go_charge"      pkg="test_sym_imu" type="go_charge.py" output="screen"/> -->
+    <!-- 需要接收命令才能启动： rostopic pub /StartGoBaseNode std_msgs/Bool "data: true" -->
+    <!-- <node name="nav_pose" pkg="apriltag_detection"    type="nav_pose.py" output="screen"/> -->
+    <!-- 启动导航到充电桩文件 -->
+    <node name="parameter_nav_pose" pkg="apriltag_detection" type="parameter_nav_pose.py" output="screen">
+        <!-- <param name="target_x" value="7.08" />
+        <param name="target_y" value="9.53" />
+        <param name="target_z" value="0.0" />
+        <param name="target_orientation_z" value="0.529" />
+        <param name="target_orientation_w" value="0.848" /> -->
+    </node>
+    <!-- 启动相机launch文件 -->
+    <include file="$(find apriltag_detection)/launch/camera.launch"/>
+
+    <!-- 启动标签检测launch文件 -->
+    <include file="$(find apriltag_detection)/launch/continuous_detection.launch"/>
+
+    <node name="tag_camera"         pkg="apriltag_detection" type="tag_camera.py" output="screen"/>
+
 </launch>

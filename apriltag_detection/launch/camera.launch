@@ -1,20 +1,20 @@
 <launch>
 
-    <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    <node name="camera" pkg="usb_cam" type="usb_cam_node" output="screen" >
         <param name="video_device" value="/dev/video0" />
         <param name="image_width" value="640" />
         <param name="image_height" value="480" />
         <param name="pixel_format" value="yuyv" />
-        <param name="camera_frame_id" value="usb_cam" />
+        <param name="camera_frame_id" value="camera" />
         <param name="io_method" value="mmap"/>
-        <param name="camera_name" value="usb_cam"/>
+        <param name="camera_name" value="camera"/>
         <param name="camera_info_url" value="file://$(find apriltag_detection)/config/ost.yaml"/>
     </node>
     
-    <node name="charge_cam_image_proc" pkg="image_proc" type="image_proc" output="screen"  ns="usb_cam" />
+    <node name="charge_cam_image_proc" pkg="image_proc" type="image_proc" output="screen"  ns="camera" />
 
     <node pkg="tf" type="static_transform_publisher" name="base_footprint_to_camera"
-        args="-0.04 0.0 0.05 -1.57 0.0 -1.57 base_footprint usb_cam 20">
+        args="-0.04 0.0 0.05 -1.57 0.0 -1.57 base_footprint camera 20">
     </node>    
 
 </launch>
