@@ -15,6 +15,6 @@
     <!-- 启动标签检测launch文件 -->
     <include file="$(find apriltag_detection)/launch/continuous_detection.launch"/>
 
-    <node name="tag_camera"         pkg="apriltag_detection" type="tag_camera.py" output="screen"/>
+    <node name="tag_camera"         pkg="apriltag_detection" type="tag_camera2.py" output="screen"/>
 
 </launch>
