@@ -40,15 +40,19 @@ $ roslaunch apriltag_detection change_assemble.launch
 ```
 
 /***************change_assemble.launch****************/
-* nav_pose.py      # 导航节点
-* tag.launch        # 包含相机节点camera.launch、标签检测节点
-* continuous_detection.launch
-* tag_camera.py  # 对接充电桩节点
+* parameter_nav_pose.py       # 导航节点，可设置导航坐标点参数
+* camera.launch               # 包含相机节点camera.launch、标签检测节点
+* continuous_detection.launch # 标签检测节点
+* tag_camera.py               # 对接充电桩节点
 
 
-/**********************nav_pose.py**********************/
+/*****************parameter_nav_pose.py*****************/
 ##### 主要功能：
 * 订阅 /StartGoBaseNode 话题，等待接收布尔类型的启动信号。
+可在终端输入以下命令发布启动信号
+```sh
+$ rostopic pub /StartGoBaseNode std_msgs/Bool "data: true"
+```
 * 当接收到 True 信号时，启动机器人导航至预设目标点。
 * 导航结束后，判断导航是否成功，并将结果通过 /navigation_success 话题发布出去。
 ##### 设置参数：
