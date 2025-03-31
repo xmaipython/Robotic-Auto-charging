@@ -78,7 +78,7 @@ rostopic pub /StartGoBaseNode std_msgs/Bool "data: true"
 ##### 设置参数：
 * 需要根据基站位置，从/amcl_pose获取坐标信息，来设置goal导航目标点。
 
-/********************tag_camera2.py********************/
+/********************tag_camera3.py********************/
 ##### 主要功能：
 * 用于控制机器人在导航到指定位置后，通过检测 AprilTag 标签实现与充电桩的对接。具体流程如下：
 * 等待导航完成：程序启动后，处于等待状态，监听/navigation_success话题，当接收到导航成功的信号后，开始检测 AprilTag 标签。
