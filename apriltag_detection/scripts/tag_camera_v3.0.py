@@ -7,7 +7,7 @@
 2. 自动调整位置和角度对准充电桩
 3. 根据距离分阶段进行精确对接
 4. 包含标签丢失后的搜索功能
-5. 使用里程计精确控制最终后退距离
+5. 使用行程开关精确控制最终后退距离
 
 订阅的Topic:
 1. /navigation_success (std_msgs/Bool) - 导航完成信号
@@ -30,7 +30,6 @@
 - 目标位置:
   TARGET_DISTANCE_Y: 目标中心点y坐标(m)
   TARGET_DISTANCE_Z: 目标停止距离(m)
-  FINAL_BACK_DISTANCE: 最终后退距离(m)
   
 - 控制参数:
   KP_Y: y方向比例系数
@@ -55,27 +54,26 @@ from std_msgs.msg import Float64MultiArray
 # ================ 参数配置 ================
 # 运动控制
 MAX_LINEAR_SPEED = 0.18
-MIN_LINEAR_SPEED = 0.014
+MIN_LINEAR_SPEED = 0.016
 MIN_LINEAR_SPEED_X = 0.045
 MAX_ANGULAR_SPEED = 0.2
-MIN_ANGULAR_SPEED = 0.014
+MIN_ANGULAR_SPEED = 0.016
 
 # 目标位置
-TARGET_CENTER_Y = 0.0545  # 充电桩中心Y坐标
-TARGET_DISTANCE_Z = 0.435  # 目标停止距离
-FINAL_BACK_DISTANCE = 0.0498  # 最终后退距离(m)
+TARGET_CENTER_Y = -0.05  # 充电桩中心Y坐标
+TARGET_DISTANCE_Z = 0.455  # 目标停止距离
 
 # 控制参数
 KP_X = 0.65  # X方向比例系数
-KP_Y = 0.91  # Y方向比例系数
+KP_Y = 0.92  # Y方向比例系数
 KP_Z = 3.41 # Z轴旋转比例系数
 ANGLE_ERROR_THRESHOLD = 0.0011  # 角度误差阈值
 POSITION_ERROR_THRESHOLD = 0.0014  # 位置误差阈值
 
 # 搜索参数
-TAG_LOST_TIMEOUT = 1.0  # 标签丢失超时(s)
-SEARCH_TIMEOUT = 20.0  # 搜索超时(s)
-SEARCH_ROTATION_SPEED = 0.3  # 搜索旋转速度(rad/s)
+TAG_LOST_TIMEOUT = 2.0  # 标签丢失超时(s)
+SEARCH_TIMEOUT = 21.0  # 搜索超时(s)
+SEARCH_ROTATION_SPEED = 0.35  # 搜索旋转速度(rad/s)
 FULL_ROTATION = 2*math.pi  # 完整旋转角度(2π rad)
 
 class DockingController:
@@ -138,7 +136,9 @@ class DockingController:
             if len(msg.data) >= 2:
                 self.switch_triggered = (msg.data[1] == 1.0)
                 if self.switch_triggered:
+                    self.stop()
                     rospy.loginfo("行程开关触发，完成对接。")
+                    self.complete_docking()
             else:
                 rospy.logwarn("BaseResponse 数据长度不足")
         except Exception as e:
