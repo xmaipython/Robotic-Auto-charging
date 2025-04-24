@@ -14,6 +14,7 @@
 2. /tag_detections (apriltag_ros/AprilTagDetectionArray) - AprilTag检测结果
 3. /imu (sensor_msgs/Imu) - IMU传感器数据
 4. /odom (nav_msgs_msg/Odometry) - 里程计信息
+5. /BaseResponse (Float64MultiArray) - 行程开关信息
 
 发布的Topic:
 1. /cmd_vel (geometry_msgs/Twist) - 控制机器人运动
@@ -49,14 +50,15 @@ from geometry_msgs.msg import Twist, PoseWithCovarianceStamped
 from std_msgs.msg import Bool
 from sensor_msgs.msg import Imu
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Float64MultiArray
 
 # ================ 参数配置 ================
 # 运动控制
-MAX_LINEAR_SPEED = 0.17
-MIN_LINEAR_SPEED = 0.013
+MAX_LINEAR_SPEED = 0.18
+MIN_LINEAR_SPEED = 0.014
 MIN_LINEAR_SPEED_X = 0.045
 MAX_ANGULAR_SPEED = 0.2
-MIN_ANGULAR_SPEED = 0.013
+MIN_ANGULAR_SPEED = 0.014
 
 # 目标位置
 TARGET_CENTER_Y = 0.0545  # 充电桩中心Y坐标
@@ -66,7 +68,7 @@ FINAL_BACK_DISTANCE = 0.0498  # 最终后退距离(m)
 # 控制参数
 KP_X = 0.65  # X方向比例系数
 KP_Y = 0.91  # Y方向比例系数
-KP_Z = 3.4 # Z轴旋转比例系数
+KP_Z = 3.41 # Z轴旋转比例系数
 ANGLE_ERROR_THRESHOLD = 0.0011  # 角度误差阈值
 POSITION_ERROR_THRESHOLD = 0.0014  # 位置误差阈值
 
@@ -89,6 +91,7 @@ class DockingController:
         rospy.Subscriber('/tag_detections', AprilTagDetectionArray, self.tag_callback)
         rospy.Subscriber('/imu', Imu, self.imu_callback)
         rospy.Subscriber('/odom', Odometry, self.odom_callback)
+        rospy.Subscriber('/BaseResponse', Float64MultiArray, self.base_response_callback)
         
         # 状态变量
         self.state = "WAITING"
@@ -98,6 +101,7 @@ class DockingController:
         self.start_yaw = None
         self.odom_pose = None
         self.back_start_x = None
+        self.switch_triggered = False
 
     # ================ 工具方法 ================
     def get_tag_by_id(self, detections, tag_id):
@@ -128,6 +132,18 @@ class DockingController:
         rospy.signal_shutdown("对接完成")
 
     # ================ 回调函数 ================
+    def base_response_callback(self, msg):
+        """处理行程开关反馈"""
+        try:
+            if len(msg.data) >= 2:
+                self.switch_triggered = (msg.data[1] == 1.0)
+                if self.switch_triggered:
+                    rospy.loginfo("行程开关触发，完成对接。")
+            else:
+                rospy.logwarn("BaseResponse 数据长度不足")
+        except Exception as e:
+            rospy.logerr(f"BaseResponse 处理异常: {str(e)}")
+
     def odom_callback(self, msg):
         """里程计数据回调"""
         try:
@@ -280,8 +296,8 @@ class DockingController:
         angle_error = y_diff
         
         # 状态检查
-        angle_ok = abs(angle_error) < ANGLE_ERROR_THRESHOLD*2
-        pos_ok = abs(y_error) < POSITION_ERROR_THRESHOLD*2
+        angle_ok = abs(angle_error) < ANGLE_ERROR_THRESHOLD*2.2
+        pos_ok = abs(y_error) < POSITION_ERROR_THRESHOLD*2.2
         
         cmd_vel = Twist()
         LIMITED_SPEED =  0.007 # 严格限速值
@@ -397,11 +413,11 @@ class DockingController:
             return
             
         distance_moved = abs(self.odom_pose.x - self.back_start_x)
-        if distance_moved >= FINAL_BACK_DISTANCE:
+        if self.switch_triggered:
             self.complete_docking()
         else:
-            speed = -0.03 if (FINAL_BACK_DISTANCE - distance_moved) < 0.01 else -0.05
-            rospy.loginfo(f"剩余距离:{(FINAL_BACK_DISTANCE-distance_moved):.3f}m")
+            speed = -0.04 if (distance_moved> 0.05) else -0.06
+            rospy.loginfo(f"后退距离:{distance_moved:.3f}m")
             cmd_vel = Twist()
             cmd_vel.linear.x = speed
             self.cmd_vel_pub.publish(cmd_vel)
