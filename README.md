@@ -1,7 +1,23 @@
 # ROBOTIC-AUTO-CHARGING
 
 标签检测功能来源于@冰达机器人，仅供免费使用，如有侵权请联系
-
+##### usb_cam 下载此功能包
+```sh
+cd ~/catkin_ws/src
+git clone https://github.com/xmaipython/Robotic-Auto-charging.git
+```
+可以运行一键安装依赖包：
+```sh
+cd ./Robotic-Auto-charging
+chmod 777 ./build.sh
+./build.sh
+```
+手动安装请看这里：
+```sh
+cd ~/catkin_ws
+catkin_make
+source ./devel/setup.bash
+```
 ### 使用前准备-功能包
 ##### usb_cam 下载摄像头驱动包
 ```sh
@@ -23,17 +39,7 @@ rqt_image_view
 sudo apt install ros-$ROS_DISTRO-apriltag-ros
 ```
 
-##### usb_cam 下载此功能包
-```sh
-cd ~/catkin_ws/src
-git clone https://github.com/xmaipython/Robotic-Auto-charging.git
-```
-将文件夹apriltag_detection移动到上一个目录，然后编译工作空间
-```sh
-cd ~/catkin_ws
-catkin_make
-source ./devel/setup.bash
-```
+
 
 ### doc目录
 存放了tag36h11标签族的标签图像，方便直接取用
