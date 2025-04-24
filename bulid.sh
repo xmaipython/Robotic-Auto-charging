@@ -7,4 +7,4 @@ sudo apt install ros-$ROS_DISTRO-apriltag-ros
 
 echo "开始编译节点"
 
-caktin_make -j2
+catkin_make -j2
