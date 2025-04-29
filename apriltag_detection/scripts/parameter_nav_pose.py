@@ -9,6 +9,7 @@ from std_msgs.msg import Bool  # 导入布尔消息类型
 # 定义导航函数
 def start_navigation():
     # 创建 action client
+    jidianqi_pub.publish(True)  # 发布启动信号
     ac = actionlib.SimpleActionClient('move_base', MoveBaseAction)
     ac.wait_for_server()
 
@@ -41,7 +42,7 @@ def start_navigation():
     navigation_success = ac.get_state() == actionlib.GoalStatus.SUCCEEDED
     if navigation_success:
         rospy.loginfo("导航成功！")
-        jidianqi_pub.publish(True)  # 发布启动信号
+
         rospy.loginfo("已发布启动信号")
     else:
         rospy.loginfo("导航失败...")
@@ -63,7 +64,7 @@ if __name__ == "__main__":
 
     # 创建导航成功话题的发布者
     navigation_success_pub = rospy.Publisher('/navigation_success', Bool, queue_size=1)
-    jidianqi_pub = rospy.Pubscriber("/BasecallResponseControl",Bool,queue_size=1)
+    jidianqi_pub = rospy.Publisher("/BaseCallResponseControl",Bool,queue_size=1)
     # 创建订阅者，订阅 /StartGoBaseNode 话题
     rospy.Subscriber("/StartGoBaseNode", Bool, start_callback)
 

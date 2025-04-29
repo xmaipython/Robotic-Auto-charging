@@ -19,6 +19,7 @@
 发布的Topic:
 1. /cmd_vel (geometry_msgs/Twist) - 控制机器人运动
 2. /docking_complete (std_msgs/Bool) - 对接完成信号(True表示完成)
+3. /BaseCallResponseControl (std_msgs/Bool) - 继电器启动指令(True表示启动)
 
 可调参数:
 - 速度控制:
@@ -83,7 +84,7 @@ class DockingController:
         # 通信接口
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.docking_complete_pub = rospy.Publisher('/docking_complete', Bool, queue_size=1)
-        self.jdq_pub = rospy.Pubscriber("/BasecallResponseControl",Bool,queue_size=1)
+        self.jdq_pub = rospy.Publisher("/BasecallResponseControl",Bool,queue_size=1)
         # 订阅话题
         rospy.Subscriber('/navigation_success', Bool, self.nav_callback)
         rospy.Subscriber('/tag_detections', AprilTagDetectionArray, self.tag_callback)
@@ -94,6 +95,7 @@ class DockingController:
         # 状态变量
         self.state = "WAITING"
         self.last_tag_time = rospy.Time.now()
+        self.last_base_response_time = rospy.Time.now()
         self.start_search_time = None
         self.current_yaw = 0
         self.start_yaw = None
@@ -126,13 +128,14 @@ class DockingController:
         """完成对接流程"""
         self.stop()
         self.docking_complete_pub.publish(Bool(True))
-        self.jdq_pub.publish(False)  # 发布行程开关关闭信号
+        self.jdq_pub.publish(Bool(False))  # 发布行程开关关闭信号
         rospy.loginfo("对接完成，关闭程序")
         rospy.signal_shutdown("对接完成")
 
     # ================ 回调函数 ================
     def base_response_callback(self, msg):
         """处理行程开关反馈"""
+        self.last_base_response_time = rospy.Time.now()
         try:
             if len(msg.data) >= 2:
                 self.switch_triggered = (msg.data[1] == 1.0)
@@ -252,7 +255,8 @@ class DockingController:
         # 确保tag0在左，tag1在右
         if tag0.position.x > tag1.position.x:
             tag0, tag1 = tag1, tag0
-            
+        self.jdq_pub.publish(Bool(True)) 
+        self.handle_base_response_timeout()
         # 计算控制参数
         center_x = (tag0.position.x + tag1.position.x)/2
         z_distance = tag0.position.z
@@ -391,6 +395,13 @@ class DockingController:
             self.reset_to_waiting("搜索超时")
         elif not self.start_yaw:
             self.start_rotation_search()
+
+    def handle_base_response_timeout(self):
+        """处理BaseResponse继电器消息丢失超时"""
+        TIMEOUT_THRESHOLD = 3.0  # 秒
+        time_since_last = (rospy.Time.now() - self.last_base_response_time).to_sec()
+        if time_since_last > TIMEOUT_THRESHOLD:
+            self.reset_to_waiting("继电器状态异常")
 
     def start_rotation_search(self):
         """开始旋转搜索"""
