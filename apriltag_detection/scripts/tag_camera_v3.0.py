@@ -83,7 +83,7 @@ class DockingController:
         # 通信接口
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.docking_complete_pub = rospy.Publisher('/docking_complete', Bool, queue_size=1)
-        
+        self.jdq_pub = rospy.Pubscriber("/BasecallResponseControl",Bool,queue_size=1)
         # 订阅话题
         rospy.Subscriber('/navigation_success', Bool, self.nav_callback)
         rospy.Subscriber('/tag_detections', AprilTagDetectionArray, self.tag_callback)
@@ -126,6 +126,7 @@ class DockingController:
         """完成对接流程"""
         self.stop()
         self.docking_complete_pub.publish(Bool(True))
+        self.jdq_pub.publish(False)  # 发布行程开关关闭信号
         rospy.loginfo("对接完成，关闭程序")
         rospy.signal_shutdown("对接完成")
 
