@@ -110,7 +110,7 @@ class WindowFunction():
             type_ = self.type_list[0] 
             command = self.command_list[0]
             dir = ""
-            path_name = self.ui.textEdit.toPlainText()
+            path_name = w.textEdit_usePath.toPlainText()
             map = ""
             response = self.task_client(type_, command, dir, path_name, map)
             msg = f"✅[成功] 调用xju_task服务,返回消息: {response.message}"
@@ -152,7 +152,45 @@ class WindowFunction():
             err = f"[错误] xju_zone服务调用失败: {str(e)}"
             self.ui.textEdit_Log.append(err)
             rospy.logerr(err)
-  
+    
+    def pushBut_delateWall(self):
+        self.ui.textEdit_Log.clear() 
+        try:
+            command = 1
+            cost = 0
+            zone = []
+            id = int(w.textEdit_delateWall.toPlainText())
+            response = self.zone_client(command, cost, zone, id)
+            msg = f"✅成功生成虚拟墙,返回消息: {response.id}"
+            self.ui.textEdit_Log.append(msg)
+            rospy.loginfo(f"{msg}")
+        except Exception as e:
+            err = f"[错误] xju_zone服务调用失败: {str(e)}"
+            self.ui.textEdit_Log.append(err)
+            rospy.logerr(err)
+
+    def pushBut_cleanAllWall(self):
+        self.ui.textEdit_Log.clear() 
+        try:
+            command = 2
+            cost = 0
+            zone = []
+            id = 0
+            response = self.zone_client(command, cost, zone, id)
+            msg = f"✅成功生成虚拟墙,返回消息: {response.id}"
+            self.ui.textEdit_Log.append(msg)
+            rospy.loginfo(f"{msg}")
+        except Exception as e:
+            err = f"[错误] xju_zone服务调用失败: {str(e)}"
+            self.ui.textEdit_Log.append(err)
+            rospy.logerr(err)
+
+    def pushBut_receiveWall(self):
+        msg = "功德+1"
+        self.ui.textEdit_Log.append(msg)    
+
+
+
 if __name__ == '__main__':
     #1.创建主程序类
     app = QApplication(sys.argv)
@@ -168,7 +206,13 @@ if __name__ == '__main__':
 
     w.pushBut_drawWall.clicked.connect(myWindowFunction.OnBnClickDrawWall)
     w.pushBut_useWall.clicked.connect(myWindowFunction.OnBnClickuUseWall)
+
+    w.pushBut_delateWall.clicked.connect(myWindowFunction.pushBut_delateWall)
+    w.pushBut_cleanAllWall.clicked.connect(myWindowFunction.pushBut_cleanAllWall)
+    w.pushBut_receiveWall.clicked.connect(myWindowFunction.pushBut_receiveWall)
  
+
+
     #2.阻塞主函数，等待APP退出
     sys.exit(app.exec_())
    
