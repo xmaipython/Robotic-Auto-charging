@@ -123,14 +123,17 @@ class DockingController:
         self.start_yaw = None
         self.back_start_x = None
         rospy.logwarn(f"返回等待状态. 原因: {reason}")
-
+        if hasattr(self, 'fine_adjust_start_time'):
+            del self.fine_adjust_start_time  # 清除限速模式标志
+            
     def complete_docking(self):
         """完成对接流程"""
         self.stop()
         self.docking_complete_pub.publish(Bool(True))
         self.jdq_pub.publish(Bool(False))  # 发布行程开关关闭信号
         rospy.loginfo("对接完成，关闭程序")
-        rospy.signal_shutdown("对接完成")
+        # rospy.signal_shutdown("对接完成")
+        self.reset_to_waiting(reason="对接完成，自动重置")
 
     # ================ 回调函数 ================
     def base_response_callback(self, msg):
