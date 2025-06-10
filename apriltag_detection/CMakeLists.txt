@@ -157,9 +157,8 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
   scripts/nav_pose.py
-  scripts/tag_camera.py
-  scripts/tag_camera2.py
-  scripts/tag_camera3.py
+  scripts/tag_camera_v2.1.py
+  scripts/tag_camera_v3.0.py
   scripts/parameter_nav_pose.py
   scripts/test_x.py
 

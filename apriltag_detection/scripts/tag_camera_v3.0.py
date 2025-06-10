@@ -18,7 +18,7 @@
 
 发布的Topic:
 1. /cmd_vel (geometry_msgs/Twist) - 控制机器人运动
-2. /docking_complete (std_msgs/Bool) - 对接完成信号(True表示完成)
+2. /BaseStationReach (std_msgs/Bool) - 对接完成信号(True表示完成)
 3. /BaseCallResponseControl (std_msgs/Bool) - 继电器启动指令(True表示启动)
 
 可调参数:
@@ -71,6 +71,9 @@ KP_Z = 3.41 # Z轴旋转比例系数
 ANGLE_ERROR_THRESHOLD = 0.0011  # 角度误差阈值
 POSITION_ERROR_THRESHOLD = 0.0014  # 位置误差阈值
 
+# 超时处理
+TIMEOUT_THRESHOLD = 20.0  # 行程开关超时阈值(s)
+
 # 搜索参数
 TAG_LOST_TIMEOUT = 2.0  # 标签丢失超时(s)
 SEARCH_TIMEOUT = 21.0  # 搜索超时(s)
@@ -83,7 +86,7 @@ class DockingController:
         
         # 通信接口
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
-        self.docking_complete_pub = rospy.Publisher('/docking_complete', Bool, queue_size=1)
+        self.docking_complete_pub = rospy.Publisher('/BaseStationReach', Bool, queue_size=1)
         self.jdq_pub = rospy.Publisher("/BasecallResponseControl",Bool,queue_size=1)
         # 订阅话题
         rospy.Subscriber('/navigation_success', Bool, self.nav_callback)
@@ -102,6 +105,9 @@ class DockingController:
         self.odom_pose = None
         self.back_start_x = None
         self.switch_triggered = False
+        self.tag_0 = 0  # 充电桩左侧标签ID
+        self.tag_1 = 1  # 充电桩右侧标签ID
+        
 
     # ================ 工具方法 ================
     def get_tag_by_id(self, detections, tag_id):
@@ -187,8 +193,8 @@ class DockingController:
         
         try:
             # 安全获取标签
-            tag0 = self.get_tag_by_id(msg.detections, 0)
-            tag1 = self.get_tag_by_id(msg.detections, 1)
+            tag0 = self.get_tag_by_id(msg.detections, self.tag_0)
+            tag1 = self.get_tag_by_id(msg.detections, self.tag_1)
             
             # 状态处理
             if self.state == "SEARCHING":
@@ -220,7 +226,7 @@ class DockingController:
         if len(detections) == 1:
             tag_id = detections[0].id[0]
             cmd_vel = Twist()
-            cmd_vel.angular.z = -SEARCH_ROTATION_SPEED if tag_id == 0 else SEARCH_ROTATION_SPEED
+            cmd_vel.angular.z = -SEARCH_ROTATION_SPEED if tag_id == self.tag_0 else SEARCH_ROTATION_SPEED
             self.cmd_vel_pub.publish(cmd_vel)
             rospy.loginfo(f"检测到单标签{tag_id}，执行定向旋转")
             return
@@ -401,7 +407,7 @@ class DockingController:
 
     def handle_base_response_timeout(self):
         """处理BaseResponse继电器消息丢失超时"""
-        TIMEOUT_THRESHOLD = 3.0  # 秒
+        
         time_since_last = (rospy.Time.now() - self.last_base_response_time).to_sec()
         if time_since_last > TIMEOUT_THRESHOLD:
             self.reset_to_waiting("继电器状态异常")
